@@ -1,4 +1,3 @@
-use std::alloc::handle_alloc_error;
 
 use rand::{random, Rng};
 use rand::seq::SliceRandom;
@@ -30,13 +29,6 @@ impl Collide {
             rect: r,
         }
     }
-}
-
-enum Compass {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
 }
 
 const NORTH: usize = 0;
@@ -84,10 +76,10 @@ impl Maze {
                 cell_grid[y][x].walls[EAST] = (Wall::new((x * CELL_SIZE) as i32 + CELL_SIZE as i32, (y * CELL_SIZE) as i32, wall_width, CELL_SIZE as i32));
                 cell_grid[y][x].walls[SOUTH] = (Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32 + CELL_SIZE as i32, CELL_SIZE as i32, wall_width));
                 cell_grid[y][x].walls[WEST] = (Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32, wall_width, CELL_SIZE as i32));
-                let mut north = y as i32 - 1;
-                let mut south = y as i32 + 1;
-                let mut east = x as i32 + 1;
-                let mut west = x as i32 - 1;
+                let north = y as i32 - 1;
+                let south = y as i32 + 1;
+                let east = x as i32 + 1;
+                let west = x as i32 - 1;
                 if north >= 0 && north < height as i32 {
                     cell_grid[y][x].neighbours.push((north as usize, x));
                 }
@@ -143,7 +135,7 @@ impl Maze {
         for xx in 1..width - 1 {
             for yy in 1..height - 1 {
                 let random = rng.gen_range(1, 100);
-                if random > 90 {
+                if random > 95 {
                     let e = if yy % 2 == 0 {
                         Prize::new((xx * CELL_SIZE) as f64, (yy * CELL_SIZE) as f64, Prize_Type::EXTRA_PROJECTILES)
                     } else {

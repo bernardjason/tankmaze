@@ -5,13 +5,12 @@ use sdl2::event::Event;
 use sdl2::gfx::framerate::FPSManager;
 use sdl2::keyboard::Keycode;
 use sdl2::render::TextureCreator;
-use self::sdl2::pixels::Color;
-use crate::tank_maze::common::{SCREEN_WIDTH, SCREEN_HEIGHT};
-use crate::tank_maze::sound::load_sound;
-use crate::tank_maze::message_area::MessageArea;
-use std::time::SystemTime;
-use rand::{random, Rng};
 
+use crate::tank_maze::common::{SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::tank_maze::message_area::MessageArea;
+use crate::tank_maze::sound::load_sound;
+
+use self::sdl2::pixels::Color;
 
 mod common;
 mod start_screen;
@@ -26,8 +25,8 @@ mod extra_prizes;
 mod message_area;
 
 pub fn tank_maze() -> Result<(), String> {
-    let mut sdl_context = sdl2::init()?;
-    let mut video_subsystem = sdl_context.video()?;
+    let sdl_context = sdl2::init()?;
+    let video_subsystem = sdl_context.video()?;
     let mut frame_control = FPSManager::new();
     let mut current_screen = 0;
 
@@ -77,7 +76,7 @@ pub fn tank_maze() -> Result<(), String> {
                     Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                         break 'gui_loop;
                     }
-                    Event::KeyDown { timestamp, window_id, keycode, scancode, keymod, repeat } => {
+                    Event::KeyDown { timestamp:_, window_id:_, keycode, scancode:_, keymod, repeat } => {
                         message = message.key_down_handle(keycode.unwrap(), keymod);
                         message_area_active = !message.input_text_complete;
                     }
@@ -138,8 +137,8 @@ pub fn tank_maze() -> Result<(), String> {
         match current_screen {
            0 => {
                start_screen.update();
-               start_screen = start_screen.draw_on_canvas(&mut canvas);
-               if start_screen.bernie_x > (SCREEN_WIDTH / 3) as i32 || current_event == common::Event::Space {
+               start_screen = start_screen.draw_on_canvas(&mut canvas,&message_font,&texture_creator);
+               if start_screen.bernie_x > SCREEN_WIDTH  as i32 || current_event == common::Event::Space {
                    current_screen = 1;
                    message_area_active = false;
                    main_screen = main_screen.new_game();

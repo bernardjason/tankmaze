@@ -5,8 +5,6 @@ use crate::tank_maze::common;
 use super::sdl2::rect::Point;
 use crate::tank_maze::sound::{play, ENGINE, stop, volume};
 use crate::tank_maze::projectile::Projectile;
-use std::ops::{Deref, DerefMut};
-use std::borrow::{Borrow, BorrowMut};
 
 
 #[derive(Clone)]
@@ -36,7 +34,7 @@ impl fmt::Display for PlayerCar {
 }
 
 impl PlayerCar {
-    pub const MAX_PROJECTILES:usize = 10;
+    pub const MAX_PROJECTILES:usize = 4;
 
     pub fn new() -> PlayerCar {
         let width: u32 = 64;
@@ -57,7 +55,7 @@ impl PlayerCar {
             accelerate: false,
             break_pedal: false,
             bonus_time:0,
-            available_projectiles: 2,
+            available_projectiles: 1,
             projectiles: vec![],
         };
         p
@@ -135,7 +133,7 @@ impl PlayerCar {
         self.collide.rect.set_x(self.x as i32);
         self.collide.rect.set_y(self.y as i32);
 
-        for mut p in self.projectiles.iter_mut() {
+        for p in self.projectiles.iter_mut() {
             p.update();
         }
 
@@ -162,19 +160,19 @@ pub fn get_rotated(player: &PlayerCar) -> [Point; 13] {
     let centry_y = (player.y + 0.0) as i32;
     let points = [
         // sort out collision detection
+        gp(40.0, player.rotate - 34.0).offset(centre_x, centry_y),
+        gp(40.0, player.rotate - 22.0).offset(centre_x, centry_y),
+        gp(40.0, player.rotate - 11.0).offset(centre_x, centry_y),
+        gp(40.0, player.rotate).offset(centre_x, centry_y),
+        gp(40.0, player.rotate + 11.0).offset(centre_x, centry_y),
+        gp(40.0, player.rotate + 22.0).offset(centre_x, centry_y),
+        gp(40.0, player.rotate + 34.0).offset(centre_x, centry_y),
         gp(38.0, player.rotate - 45.0).offset(centre_x, centry_y),
-        gp(36.0, player.rotate - 34.0).offset(centre_x, centry_y),
-        gp(34.0, player.rotate - 22.0).offset(centre_x, centry_y),
-        gp(33.0, player.rotate - 11.0).offset(centre_x, centry_y),
-        gp(32.0, player.rotate).offset(centre_x, centry_y),
-        gp(33.0, player.rotate + 11.0).offset(centre_x, centry_y),
-        gp(34.0, player.rotate + 22.0).offset(centre_x, centry_y),
-        gp(36.0, player.rotate + 34.0).offset(centre_x, centry_y),
         gp(38.0, player.rotate + 45.0).offset(centre_x, centry_y),
-        gp(33.0, player.rotate + 60.0).offset(centre_x, centry_y),
-        gp(33.0, player.rotate - 60.0).offset(centre_x, centry_y),
-        gp(32.0, player.rotate + 90.0).offset(centre_x, centry_y),
-        gp(32.0, player.rotate - 90.0).offset(centre_x, centry_y),
+        gp(38.0, player.rotate + 60.0).offset(centre_x, centry_y),
+        gp(38.0, player.rotate - 60.0).offset(centre_x, centry_y),
+        gp(38.0, player.rotate + 90.0).offset(centre_x, centry_y),
+        gp(38.0, player.rotate - 90.0).offset(centre_x, centry_y),
     ];
 
 

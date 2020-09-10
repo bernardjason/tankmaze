@@ -1,31 +1,27 @@
 extern crate pretty_env_logger;
 extern crate sdl2;
 
+use std::time::{SystemTime};
+
 use sdl2::image::LoadTexture;
-use sdl2::render::{TextureCreator, BlendMode};
+use sdl2::pixels::Color;
+use sdl2::rect::{Rect};
+use sdl2::render::{BlendMode, TextureCreator};
 use sdl2::ttf::Font;
 use sdl2::video::WindowContext;
 
+use crate::tank_maze::{common };
+use crate::tank_maze::common::{Event, make_title_texture, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::tank_maze::extra_prizes::Prize_Type;
+use crate::tank_maze::maze::{CELL_SIZE, Maze};
+use crate::tank_maze::player_car::{get_rotated, PlayerCar};
+use crate::tank_maze::sound::{ENGINE, HIT_WALL, play, stop};
 
 use self::sdl2::render::{Canvas, Texture};
 use self::sdl2::video::Window;
 
-use crate::tank_maze::player_car::{PlayerCar, get_rotated};
-use crate::tank_maze::maze::{Maze, CELL_SIZE};
-use sdl2::pixels::Color;
-use crate::tank_maze::{common, tank_maze};
-use sdl2::rect::{Point, Rect};
-use std::borrow::Borrow;
-use std::ops::{Deref, DerefMut};
-use crate::tank_maze::common::{SCREEN_WIDTH, SCREEN_HEIGHT, Event, make_title_texture};
-use sdl2::render::BlendMode::Blend;
-use std::time::{Duration, SystemTime};
-use crate::tank_maze::sound::{play, HIT_WALL, stop, ENGINE};
-use crate::tank_maze::extra_prizes::Prize_Type;
-
-
 const BANNER_HEIGHT: i32 = 100;
-const LIVES: i32 = 2;
+const LIVES: i32 = 10;
 
 pub(crate) struct MainScreen<'a> {
     player_texture: Texture<'a>,
@@ -37,8 +33,8 @@ pub(crate) struct MainScreen<'a> {
     level: u32,
     pub level_done: bool,
     click_counter: i32,
+    frame_counter:i64,
     well_done: Texture<'a>,
-    oh_dear: Texture<'a>,
     start_time: SystemTime,
     pub lives:i32,
     pub took: i64,
@@ -47,9 +43,12 @@ pub(crate) struct MainScreen<'a> {
 
 }
 
+const BONUS_SECONDS: i64 = 10;
+const BONUS_PROJECTILES:usize = 10;
+
 impl<'a> MainScreen<'a> {
     pub(crate) fn new(texture_creator: &'a TextureCreator<WindowContext>, font: &Font) -> MainScreen<'a> {
-        let player = texture_creator.load_texture("artifacts/car.png").unwrap();
+        let player = texture_creator.load_texture("artifacts/tank.png").unwrap();
         let prize_texture = texture_creator.load_texture("artifacts/prize.png").unwrap();
         let extras = [
             texture_creator.load_texture("artifacts/extra_projectile.png").unwrap(),
@@ -60,15 +59,10 @@ impl<'a> MainScreen<'a> {
         let maze = Maze::new(1);
 
         let get_pixels_surface1 = font.render("Well done").blended(Color::WHITE).map_err(|e| e.to_string()).unwrap();
-        let get_pixels_surface2 = font.render("Oh dear").blended(Color::WHITE).map_err(|e| e.to_string()).unwrap();
         let well_done = make_title_texture(BANNER_HEIGHT as u32,
                                            Color::MAGENTA,
                                            &texture_creator,
                                            get_pixels_surface1);
-        let oh_dear = make_title_texture(BANNER_HEIGHT as u32,
-                                         Color::YELLOW,
-                                         &texture_creator,
-                                         get_pixels_surface2);
 
         MainScreen {
             player_texture: player,
@@ -81,10 +75,10 @@ impl<'a> MainScreen<'a> {
             level_done: false,
             click_counter: 0,
             well_done: well_done,
-            oh_dear: oh_dear,
             start_time: SystemTime::now(),
             lives:LIVES,
             took: 0,
+            frame_counter:0,
             game_over:false,
             bonus_points:0,
         }
@@ -136,12 +130,16 @@ impl<'a> MainScreen<'a> {
     }
 
     fn playing_update(&mut self, current_event: &Event) {
+        self.frame_counter=self.frame_counter+1;
         let previous = self.player.update(current_event);
         self.took = self.start_time.elapsed().unwrap().as_secs() as i64 - self.player.bonus_time;
         let player_points = get_rotated(&self.player);
         if self.maze.collision(&player_points) == true {
             self.player.rollback(previous);
             play(HIT_WALL);
+            if self.frame_counter % 30 == 0 {
+                self.lives=self.lives-1;
+            }
         }
 
         let mut i = self.player.projectiles.len() as i32 - 1;
@@ -182,10 +180,10 @@ impl<'a> MainScreen<'a> {
 
                     match extra.type_of_prize {
                         Prize_Type::EXTRA_PROJECTILES => {
-                            self.player.available_projectiles = self.player.available_projectiles + 5;
+                            self.player.available_projectiles = self.player.available_projectiles + BONUS_PROJECTILES;
                         }
                         Prize_Type::EXTRA_TIME => {
-                            self.player.bonus_time = self.player.bonus_time + 10;
+                            self.player.bonus_time = self.player.bonus_time + BONUS_SECONDS;
                         }
                     }
                 }
@@ -202,7 +200,7 @@ impl<'a> MainScreen<'a> {
 
             let me = self.playing_draw_in_canvas(canvas);
 
-            let mut adj = Rect::new(me.click_counter, banner_y, SCREEN_WIDTH, BANNER_HEIGHT as u32);
+            let adj = Rect::new(me.click_counter, banner_y, SCREEN_WIDTH, BANNER_HEIGHT as u32);
             canvas.copy(&me.well_done, None, adj).unwrap();
             if clicker % 20 < 14 {
                 let mut score_text = format!("Took seconds {} quicker by {} bonus now {}", took, estimate_over,me.bonus_points);
@@ -213,7 +211,7 @@ impl<'a> MainScreen<'a> {
                 let font_surface = font.render(score_text.as_str()).blended(Color::YELLOW).unwrap();
                 let mut texture_text = font_surface.as_texture(&texture_creator).unwrap();
                 texture_text.set_blend_mode(BlendMode::Blend);
-                canvas.copy(&texture_text, None, Rect::new(me.click_counter, banner_y + BANNER_HEIGHT, font_surface.width(), 48));
+                canvas.copy(&texture_text, None, Rect::new(me.click_counter, banner_y + BANNER_HEIGHT, font_surface.width(), 48)).unwrap();
             }
             me
         } else {
@@ -228,7 +226,7 @@ impl<'a> MainScreen<'a> {
             let font_surface = font.render(score_text.as_str()).blended(Color::YELLOW).unwrap();
             let mut texture_text = font_surface.as_texture(&texture_creator).unwrap();
             texture_text.set_blend_mode(BlendMode::Blend);
-            canvas.copy(&texture_text, None, Rect::new(0, 0, font_surface.width(), 48));
+            canvas.copy(&texture_text, None, Rect::new(0, 0, font_surface.width(), 48)).unwrap();
 
 
             self.playing_draw_in_canvas(canvas)
@@ -293,25 +291,8 @@ impl<'a> MainScreen<'a> {
     }
 
 
-    pub fn car_moves_on_screen_draw_on_canvas(self, canvas: &mut Canvas<Window>) -> MainScreen<'a> {
-        let mut adj = self.player.collide.rect.clone();
-        adj.offset((self.player.collide.rect.width() as i32 / -2), (self.player.collide.rect.height() as i32 / -2));
-
-        canvas.copy_ex(&self.player_texture, None,
-                       Some(adj),
-                       self.player.rotate, None, false, false).unwrap();
-
-        canvas.set_draw_color(Color::CYAN);
-        for w in self.maze.maze_object.iter() {
-            let mut adj = w.collide.rect.clone();
-            adj.offset((w.collide.rect.width() as i32 / -2) as i32, (w.collide.rect.height() as i32 / -2) as i32);
-            canvas.draw_rect(w.collide.rect).unwrap();
-        }
-
-        self
-    }
 }
 
 fn measure_against_estimate(squares: u32, took: i64) -> i32 {
-    return (squares as f64 * 0.35 - took as f64) as i32;
+    return (squares as f64 * 0.25 - took as f64) as i32;
 }

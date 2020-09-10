@@ -1,6 +1,4 @@
 use crate::tank_maze::maze::Collide;
-use std::ops::Deref;
-use std::borrow::Borrow;
 use super::sdl2::rect::Point;
 
 

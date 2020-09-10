@@ -1,19 +1,16 @@
 extern crate pretty_env_logger;
 extern crate sdl2;
 
-use sdl2::rect::Rect;
-
-use self::sdl2::render::{Canvas, Texture};
-use self::sdl2::video::{Window};
-use sdl2::render::{TextureCreator, BlendMode};
-use sdl2::video::WindowContext;
-use sdl2::ttf::Font;
-use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::surface::Surface;
-use sdl2::render::BlendMode::Blend;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+
+use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::render::{BlendMode, TextureCreator};
+use sdl2::surface::Surface;
+use sdl2::video::WindowContext;
+
+use self::sdl2::render::{ Texture};
 
 pub const SCREEN_WIDTH: u32 = 1024;
 pub const SCREEN_HEIGHT: u32 = 800;

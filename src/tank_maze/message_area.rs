@@ -78,7 +78,7 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
         //canvas.clear();
 
         let input_rect = Rect::new(x, y, input_width, HEIGHT);
-        canvas.copy(&input_texture, None, input_rect);
+        canvas.copy(&input_texture, None, input_rect).unwrap();
 
         let cursor_offset = if self.input_text.len() > 0 {
             input_width
@@ -90,8 +90,8 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
         self.cursor_flash=self.cursor_flash+1;
         if self.cursor_flash % 100  < 50 {
             canvas.set_draw_color(self.text_colour);
-            let cursor_Rect = Rect::new(x + cursor_offset as i32, y + (HEIGHT / 4) as i32, HEIGHT / 3, (HEIGHT as f64 * 0.6) as u32);
-            canvas.fill_rect(cursor_Rect);
+            let cursor_rect = Rect::new(x + cursor_offset as i32, y + (HEIGHT / 4) as i32, HEIGHT / 3, (HEIGHT as f64 * 0.6) as u32);
+            canvas.fill_rect(cursor_rect).unwrap();
         }
 
         self
@@ -154,7 +154,7 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
                     Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                         break 'gui_loop;
                     }
-                    Event::KeyDown { timestamp, window_id, keycode, scancode, keymod, repeat } => {
+                    Event::KeyDown { timestamp:_, window_id:_, keycode, scancode:_, keymod, repeat } => {
                         let mut name = keycode.unwrap().name();
                         let first = &name[..1];
                         if name == "Return" {
@@ -204,7 +204,7 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
             canvas.clear();
 
             let input_rect = Rect::new(0, 400, input_width, HEIGHT);
-            canvas.copy(&input_texture, None, input_rect);
+            canvas.copy(&input_texture, None, input_rect).unwrap();
             canvas.present();
         }
         self

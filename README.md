@@ -12,3 +12,4 @@ Linux build (assuming you are running on linux of course..)
 ```
 cargo build
 ```
+

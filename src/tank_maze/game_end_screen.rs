@@ -1,21 +1,20 @@
 extern crate pretty_env_logger;
 extern crate sdl2;
 
+use std::fs::File;
+use std::io::{ Write};
+use std::path::Path;
+
+use sdl2::pixels::{Color};
 use sdl2::rect::Rect;
+use sdl2::render::{BlendMode, TextureCreator};
+use sdl2::ttf::Font;
+use sdl2::video::WindowContext;
+
+use crate::tank_maze::common::{make_title_texture, read_lines, SCREEN_WIDTH};
 
 use self::sdl2::render::{Canvas, Texture};
-use self::sdl2::video::{Window};
-use crate::tank_maze::common::{SCREEN_WIDTH, make_title_texture, read_lines};
-use sdl2::render::{TextureCreator, BlendMode};
-use sdl2::video::WindowContext;
-use sdl2::ttf::Font;
-use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::surface::Surface;
-use gio::FileExt;
-use std::fs::File;
-use std::io::{self, BufRead, Write};
-use std::path::Path;
-use std::ops::Range;
+use self::sdl2::video::Window;
 
 struct score_entry {
     score: i64,
@@ -101,7 +100,7 @@ impl<'a> GameEndScreen<'a> {
             let mut file = File::create(&path).expect("open file high_scores.xt to update");
             for s in self.table.iter() {
                 let e = format!("{},{}\n",s.score,s.who);
-                file.write(e.as_bytes());
+                file.write(e.as_bytes()).unwrap();
             }
 
         }
@@ -143,6 +142,6 @@ impl<'a> GameEndScreen<'a> {
         let font_surface = font.render(score_text.as_str()).blended(colour).unwrap();
         let mut texture_text = font_surface.as_texture(&texture_creator).unwrap();
         texture_text.set_blend_mode(BlendMode::Blend);
-        canvas.copy(&texture_text, None, Rect::new(x, y, font_surface.width(), 48));
+        canvas.copy(&texture_text, None, Rect::new(x, y, font_surface.width(), 48)).unwrap();
     }
 }
