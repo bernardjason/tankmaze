@@ -1,19 +1,18 @@
 extern crate sdl2;
 
-use super::sdl2::ttf::{Sdl2TtfContext, Font};
-use super::sdl2::pixels::Color;
-use super::sdl2::render::{TextureCreator, Texture};
-use super::sdl2::video::WindowContext;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
-use sdl2::Sdl;
-use sdl2::rect::Rect;
-use sdl2::surface::Surface;
 use std::thread::sleep;
 use std::time::Duration;
-use std::borrow::{Borrow, BorrowMut};
-use sdl2::render::{WindowCanvas, Canvas};
+
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::rect::Rect;
+use sdl2::render::Canvas;
+use sdl2::Sdl;
 use sdl2::video::Window;
+
+use super::sdl2::pixels::Color;
+use super::sdl2::render::TextureCreator;
+use super::sdl2::ttf::Font;
 
 pub struct MessageArea<'tex, 'a> {
     font: &'tex Font<'tex, 'a>,
@@ -23,27 +22,24 @@ pub struct MessageArea<'tex, 'a> {
     title:String,
     background_colour:Color,
     text_colour:Color,
-    banner:String,
     cursor_flash:u64,
 }
 
 const HEIGHT:u32 = 48;
 
 impl<'tex, 'a> MessageArea<'tex, 'a> {
-    //pub fn new(font:&mut Font, message:&str, texture_creator: &'tex TextureCreator<WindowContext>) -> MessageArea<'tex> {
-    pub fn new(font: &'a mut Font, initial_message: String,title:String,background_colour:Color,text_colour:Color,banner:String) -> MessageArea<'tex, 'a> {
+    pub fn new(font: &'a mut Font, initial_message: String,title:String,background_colour:Color,text_colour:Color) -> MessageArea<'tex, 'a> {
         font.set_style(sdl2::ttf::FontStyle::NORMAL);
 
 
         MessageArea {
-            font: font,
+            font,
             input_text: "".parse().unwrap(),
-            initial_message: initial_message,
+            initial_message,
             input_text_complete:false,
             title,
             background_colour,
             text_colour,
-            banner,
             cursor_flash:0
         }
     }
@@ -110,7 +106,7 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
             if keymod & sdl2::keyboard::Mod::CAPSMOD == sdl2::keyboard::Mod::CAPSMOD ||
                 keymod & sdl2::keyboard::Mod::LSHIFTMOD == sdl2::keyboard::Mod::LSHIFTMOD ||
                 keymod & sdl2::keyboard::Mod::RSHIFTMOD == sdl2::keyboard::Mod::RSHIFTMOD {
-                ;
+
             } else {
                 name = name.to_lowercase();
             }
@@ -210,7 +206,7 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
         self
     }
 
-    pub fn flash(self, sdl_context: &Sdl, video_subsystem: &sdl2::VideoSubsystem, seconds: u64) { //-> (Sdl, sdl2::VideoSubsystem) {
+    pub fn flash(self, _sdl_context: &Sdl, video_subsystem: &sdl2::VideoSubsystem, seconds: u64) { //-> (Sdl, sdl2::VideoSubsystem) {
         let window = video_subsystem.window("window message", 512, 512)
             .position_centered()
             .borderless()
@@ -218,17 +214,11 @@ impl<'tex, 'a> MessageArea<'tex, 'a> {
 
         let mut canvas = window.into_canvas().build().unwrap();
 
-        let texture_creator: TextureCreator<_> = canvas.texture_creator();
-
-        //let message = self.message.as_texture(&texture_creator).unwrap();
-
+        //let texture_creator: TextureCreator<_> = canvas.texture_creator();
 
         canvas.set_draw_color(Color::RGB(0, 100, 100));
         canvas.clear();
-        //let rect = Rect::new(100, 100, 200, 200);
-        //canvas.copy(&message, None, rect);
         canvas.present();
         sleep(Duration::new(seconds, 0));
-        //return (sdl_context,video_subsystem);
     }
 }

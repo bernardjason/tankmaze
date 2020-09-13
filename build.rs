@@ -3,15 +3,11 @@ extern crate fs_extra;
 use std::{env, fs};
 
 use fs_extra::{copy_items, dir};
-use std::fmt::Debug;
-
 
 fn main() {
     let target_arch = std::env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_default();
 
     let out_dir = env::var("OUT_DIR").unwrap();
-
-
 
     if target_arch == "unix"  {
         println!("cargo:rustc-link-lib=static=SDL2_image");

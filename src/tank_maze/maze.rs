@@ -1,9 +1,8 @@
-
-use rand::{random, Rng};
+use rand::Rng;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-use crate::tank_maze::extra_prizes::{Prize, Prize_Type};
+use crate::tank_maze::extra_prizes::{Prize, PrizeType};
 use crate::tank_maze::wall::Wall;
 
 use super::sdl2::rect::{Point, Rect};
@@ -72,10 +71,10 @@ impl Maze {
 
         for x in 0..width {
             for y in 0..height {
-                cell_grid[y][x].walls[NORTH] = (Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32, CELL_SIZE as i32, wall_width));
-                cell_grid[y][x].walls[EAST] = (Wall::new((x * CELL_SIZE) as i32 + CELL_SIZE as i32, (y * CELL_SIZE) as i32, wall_width, CELL_SIZE as i32));
-                cell_grid[y][x].walls[SOUTH] = (Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32 + CELL_SIZE as i32, CELL_SIZE as i32, wall_width));
-                cell_grid[y][x].walls[WEST] = (Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32, wall_width, CELL_SIZE as i32));
+                cell_grid[y][x].walls[NORTH] = Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32, CELL_SIZE as i32, wall_width);
+                cell_grid[y][x].walls[EAST] = Wall::new((x * CELL_SIZE) as i32 + CELL_SIZE as i32, (y * CELL_SIZE) as i32, wall_width, CELL_SIZE as i32);
+                cell_grid[y][x].walls[SOUTH] = Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32 + CELL_SIZE as i32, CELL_SIZE as i32, wall_width);
+                cell_grid[y][x].walls[WEST] = Wall::new((x * CELL_SIZE) as i32, (y * CELL_SIZE) as i32, wall_width, CELL_SIZE as i32);
                 let north = y as i32 - 1;
                 let south = y as i32 + 1;
                 let east = x as i32 + 1;
@@ -137,9 +136,9 @@ impl Maze {
                 let random = rng.gen_range(1, 100);
                 if random > 95 {
                     let e = if yy % 2 == 0 {
-                        Prize::new((xx * CELL_SIZE) as f64, (yy * CELL_SIZE) as f64, Prize_Type::EXTRA_PROJECTILES)
+                        Prize::new((xx * CELL_SIZE) as f64, (yy * CELL_SIZE) as f64, PrizeType::ExtraProjectiles)
                     } else {
-                        Prize::new((xx * CELL_SIZE) as f64, (yy * CELL_SIZE) as f64, Prize_Type::EXTRA_TIME)
+                        Prize::new((xx * CELL_SIZE) as f64, (yy * CELL_SIZE) as f64, PrizeType::ExtraTime)
                     };
                     extras.push(e);
                 }
@@ -196,7 +195,7 @@ impl Maze {
                 stack.push((use_neighbour.0, use_neighbour.1));
             } else {
                 cell_grid[current.0][current.1].end = true;
-                end_x_y = ((current.1 * CELL_SIZE + CELL_SIZE / 2) as i32, (current.0 * CELL_SIZE + CELL_SIZE / 2) as i32);
+                ((current.1 * CELL_SIZE + CELL_SIZE / 2) as i32, (current.0 * CELL_SIZE + CELL_SIZE / 2) as i32);
                 end_x_y = (((height - 1) * CELL_SIZE + CELL_SIZE / 2) as i32, ((width - 1) * CELL_SIZE + CELL_SIZE / 2) as i32);
             }
         }

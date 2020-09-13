@@ -1,5 +1,4 @@
 use std::fmt;
-use crate::tank_maze::common::{SCREEN_WIDTH, SCREEN_HEIGHT};
 use crate::tank_maze::maze::{Collide, CELL_SIZE};
 use crate::tank_maze::common;
 use super::sdl2::rect::Point;
@@ -39,9 +38,7 @@ impl PlayerCar {
     pub fn new() -> PlayerCar {
         let width: u32 = 64;
         let height: u32 = 64;
-        let mut p = PlayerCar {
-            //x: (SCREEN_WIDTH / 2) as f64,
-            //y: (SCREEN_HEIGHT / 2) as f64,
+        let p = PlayerCar {
             x: (CELL_SIZE as f64 / 2.0 - width as f64 / 4.0),
             y: (CELL_SIZE as f64 / 2.0 - height as f64 / 4.0),
             rotate: 0.0,
@@ -94,9 +91,9 @@ impl PlayerCar {
                     self.available_projectiles = self.available_projectiles-1;
                 }
             }
-            common::Event::off_Left => self.velocity_rotate = 0.0,
-            common::Event::off_Right => self.velocity_rotate = 0.0,
-            common::Event::off_Up => {
+            common::Event::OffLeft => self.velocity_rotate = 0.0,
+            common::Event::OffRight => self.velocity_rotate = 0.0,
+            common::Event::OffUp => {
                 self.velocity_x = 0.0;
                 self.velocity_y = 0.0;
             }
@@ -128,8 +125,8 @@ impl PlayerCar {
         self.new_direction();
         //}
 
-        self.x = (self.x + self.velocity_x);
-        self.y = (self.y + self.velocity_y);
+        self.x = self.x + self.velocity_x;
+        self.y = self.y + self.velocity_y;
         self.collide.rect.set_x(self.x as i32);
         self.collide.rect.set_y(self.y as i32);
 

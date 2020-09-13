@@ -24,12 +24,12 @@ pub enum Event {
     Right,
     Shift,
     Space,
-    off_Up,
-    off_Down,
-    off_Left,
-    off_Right,
-    off_Shift,
-    off_Space,
+    OffUp,
+    OffDown,
+    OffLeft,
+    OffRight,
+    OffShift,
+    OffSpace,
 }
 
 pub fn make_title_texture<'a>(height: u32, colour: Color,

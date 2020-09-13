@@ -64,7 +64,7 @@ impl<'a> StartScreen<'a> {
         let mut y = 400;
         for line in self.instructions.iter() {
             let font_surface = font.render(line).blended(Color::YELLOW).unwrap();
-            let mut instructions_texture = font_surface.as_texture(&texture_creator).unwrap();
+            let instructions_texture = font_surface.as_texture(&texture_creator).unwrap();
 
             canvas.copy(&instructions_texture, None, Some(Rect::new(10, y, font_surface.width(), 48))).unwrap();
             y = y + 48;

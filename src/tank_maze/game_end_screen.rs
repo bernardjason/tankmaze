@@ -16,14 +16,14 @@ use crate::tank_maze::common::{make_title_texture, read_lines, SCREEN_WIDTH};
 use self::sdl2::render::{Canvas, Texture};
 use self::sdl2::video::Window;
 
-struct score_entry {
+struct ScoreEntry {
     score: i64,
     who: String,
 }
 
-impl score_entry {
-    pub fn new(score: i64, who: String) -> score_entry {
-        score_entry {
+impl ScoreEntry {
+    pub fn new(score: i64, who: String) -> ScoreEntry {
+        ScoreEntry {
             score: score,
             who: who,
         }
@@ -36,7 +36,7 @@ pub(crate) struct GameEndScreen<'a> {
     bonus_points: i64,
     table_updated: bool,
     pub put_on_table:bool,
-    table: Vec<score_entry>,
+    table: Vec<ScoreEntry>,
 }
 
 impl<'a> GameEndScreen<'a> {
@@ -77,7 +77,7 @@ impl<'a> GameEndScreen<'a> {
             for line in lines {
                 if let Ok(score) = line {
                     let fields: Vec<&str> = score.split(",").collect();
-                    let entry: score_entry = score_entry::new(fields[0].parse::<i64>().unwrap(), fields[1].parse().unwrap());
+                    let entry: ScoreEntry = ScoreEntry::new(fields[0].parse::<i64>().unwrap(), fields[1].parse().unwrap());
                     self.table.push(entry);
                 }
             }
@@ -87,7 +87,7 @@ impl<'a> GameEndScreen<'a> {
         self.bernie_x = self.bernie_x + 1;
         if input_done && self.table_updated == false {
             self.table_updated = true;
-            self.table.push( score_entry::new(self.bonus_points as i64, current_input));
+            self.table.push( ScoreEntry::new(self.bonus_points as i64, current_input));
             self.table.sort_by(|a, b| b.score.cmp(&a.score));
             for s in self.table.iter() {
                 println!("{} {}", s.score, s.who);
@@ -138,7 +138,7 @@ impl<'a> GameEndScreen<'a> {
         self
     }
 
-    fn draw_score_info(canvas: &mut Canvas<Window>, font: &Font, texture_creator: &&TextureCreator<WindowContext>, mut y: i32, x: i32, score_text: String,colour:Color) {
+    fn draw_score_info(canvas: &mut Canvas<Window>, font: &Font, texture_creator: &&TextureCreator<WindowContext>, y: i32, x: i32, score_text: String,colour:Color) {
         let font_surface = font.render(score_text.as_str()).blended(colour).unwrap();
         let mut texture_text = font_surface.as_texture(&texture_creator).unwrap();
         texture_text.set_blend_mode(BlendMode::Blend);

@@ -12,7 +12,7 @@ use sdl2::video::WindowContext;
 
 use crate::tank_maze::{common };
 use crate::tank_maze::common::{Event, make_title_texture, SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::tank_maze::extra_prizes::Prize_Type;
+use crate::tank_maze::extra_prizes::PrizeType;
 use crate::tank_maze::maze::{CELL_SIZE, Maze};
 use crate::tank_maze::player_car::{get_rotated, PlayerCar};
 use crate::tank_maze::sound::{ENGINE, HIT_WALL, play, stop};
@@ -156,7 +156,7 @@ impl<'a> MainScreen<'a> {
         let y2 = self.maze.end_x_y.1 as f64;
 
         let distance = ((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1)).sqrt();
-        if distance < self.prize_size as f64 * 0.75 {
+        if distance < self.prize_size as f64 * 0.75  {
             self.level_done = true;
             stop(ENGINE);
             let estimate_over = measure_against_estimate(self.maze.squares, self.took);
@@ -165,6 +165,10 @@ impl<'a> MainScreen<'a> {
             } else {
                 self.bonus_points = self.bonus_points + (estimate_over * 100) as i64;
             }
+        }
+        if self.lives <= 0 {
+            self.level_done = true;
+            stop(ENGINE);
         }
         for extra in self.maze.bonus_items.iter_mut() {
             if extra.still_valid {
@@ -179,10 +183,10 @@ impl<'a> MainScreen<'a> {
                     extra.still_valid = false;
 
                     match extra.type_of_prize {
-                        Prize_Type::EXTRA_PROJECTILES => {
+                        PrizeType::ExtraProjectiles => {
                             self.player.available_projectiles = self.player.available_projectiles + BONUS_PROJECTILES;
                         }
-                        Prize_Type::EXTRA_TIME => {
+                        PrizeType::ExtraTime => {
                             self.player.bonus_time = self.player.bonus_time + BONUS_SECONDS;
                         }
                     }
@@ -237,7 +241,7 @@ impl<'a> MainScreen<'a> {
         let mut adj = self.player.collide.rect.clone();
         adj.set_x((SCREEN_WIDTH / 2) as i32);
         adj.set_y((SCREEN_HEIGHT / 2) as i32);
-        adj.offset((self.player.collide.rect.width() as i32 / -2), (self.player.collide.rect.height() as i32 / -2));
+        adj.offset(self.player.collide.rect.width() as i32 / -2, self.player.collide.rect.height() as i32 / -2);
 
         canvas.copy_ex(&self.player_texture, None,
                        Some(adj),
@@ -248,7 +252,7 @@ impl<'a> MainScreen<'a> {
             if w.visible {
                 let mut adj = w.collide.rect.clone();
 
-                adj.offset(((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32),
+                adj.offset((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32,
                            (SCREEN_HEIGHT as i32 / 2) - self.player.y.round() as i32);
                 canvas.draw_rect(adj).unwrap();
             }
@@ -258,7 +262,7 @@ impl<'a> MainScreen<'a> {
         for p in self.player.projectiles.iter() {
             let mut adj = p.collide.rect.clone();
 
-            adj.offset(((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32),
+            adj.offset((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32,
                        (SCREEN_HEIGHT as i32 / 2) - self.player.y.round() as i32);
             canvas.fill_rect(adj).unwrap();
         }
@@ -266,14 +270,14 @@ impl<'a> MainScreen<'a> {
         for extra in self.maze.bonus_items.iter() {
             if extra.still_valid {
                 let mut adj = extra.collide.rect.clone();
-                adj.offset((extra.collide.rect.width() as i32 / 2), (extra.collide.rect.height() as i32 / 2));
-                adj.offset(((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32),
+                adj.offset(extra.collide.rect.width() as i32 / 2, extra.collide.rect.height() as i32 / 2);
+                adj.offset((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32,
                            (SCREEN_HEIGHT as i32 / 2) - self.player.y.round() as i32);
                 match extra.type_of_prize {
-                    Prize_Type::EXTRA_PROJECTILES => {
+                    PrizeType::ExtraProjectiles => {
                         canvas.copy(&self.extra_textures[0], None, adj).unwrap();
                     }
-                    Prize_Type::EXTRA_TIME => {
+                    PrizeType::ExtraTime => {
                         canvas.copy(&self.extra_textures[1], None, adj).unwrap();
                     }
                 }
@@ -282,8 +286,8 @@ impl<'a> MainScreen<'a> {
 
 
         let mut adj = Rect::new(self.maze.end_x_y.0, self.maze.end_x_y.1, self.prize_size, self.prize_size);
-        adj.offset((self.prize_size as i32 / -2), (self.prize_size as i32 / -2));
-        adj.offset(((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32),
+        adj.offset(self.prize_size as i32 / -2, self.prize_size as i32 / -2);
+        adj.offset((SCREEN_WIDTH as i32 / 2) - self.player.x.round() as i32,
                    (SCREEN_HEIGHT as i32 / 2) - self.player.y.round() as i32);
         canvas.copy(&self.prize_texture, None, adj).unwrap();
 

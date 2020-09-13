@@ -44,8 +44,7 @@ pub fn tank_maze() -> Result<(), String> {
     let mut input_font = ttf_context.load_font(font_path, 32)?;
     let mut message = MessageArea::new(&mut input_font,
                                        "Enter name please".parse().unwrap(), "Hello TEST".parse().unwrap(),
-                                       Color::YELLOW, Color::WHITE, "Baner text".parse().unwrap());
-    //message = message.display(&sdl_context, &video_subsystem);
+                                       Color::YELLOW, Color::WHITE);
 
     let window = video_subsystem.window("tank maze", SCREEN_WIDTH, SCREEN_HEIGHT)
         .position_centered()
@@ -76,7 +75,7 @@ pub fn tank_maze() -> Result<(), String> {
                     Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                         break 'gui_loop;
                     }
-                    Event::KeyDown { timestamp:_, window_id:_, keycode, scancode:_, keymod, repeat } => {
+                    Event::KeyDown { timestamp:_, window_id:_, keycode, scancode:_, keymod, repeat:_ } => {
                         message = message.key_down_handle(keycode.unwrap(), keymod);
                         message_area_active = !message.input_text_complete;
                     }
@@ -106,19 +105,19 @@ pub fn tank_maze() -> Result<(), String> {
                         current_event = common::Event::Shift
                     }
                     Event::KeyUp { keycode: Some(Keycode::Left), .. } => {
-                        current_event = common::Event::off_Left
+                        current_event = common::Event::OffLeft
                     }
                     Event::KeyUp { keycode: Some(Keycode::Right), .. } => {
-                        current_event = common::Event::off_Right
+                        current_event = common::Event::OffRight
                     }
                     Event::KeyUp { keycode: Some(Keycode::Up), .. } => {
-                        current_event = common::Event::off_Up
+                        current_event = common::Event::OffUp
                     }
                     Event::KeyUp { keycode: Some(Keycode::LShift), .. } => {
-                        current_event = common::Event::off_Shift
+                        current_event = common::Event::OffShift
                     }
                     Event::KeyUp { keycode: Some(Keycode::Space), .. } => {
-                        current_event = common::Event::off_Space
+                        current_event = common::Event::OffSpace
                     }
                     Event::KeyDown { keycode: Some(Keycode::Y), .. } => {
                         main_screen.took = 99999;
@@ -176,7 +175,7 @@ pub fn tank_maze() -> Result<(), String> {
 
         canvas.present();
 
-        let rate = frame_control.delay();
+        frame_control.delay();
     }
     Ok(())
 }
